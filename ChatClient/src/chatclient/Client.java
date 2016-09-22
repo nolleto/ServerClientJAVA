@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package chatserver;
+package chatclient;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,54 +13,58 @@ import java.net.Socket;
 
 /**
  *
- * @author Felipe
+ * @author 0094078
  */
 public class Client implements Runnable {
-    private Socket socket;
-    private BufferedReader in;
-    private PrintWriter out;
+    Socket socket;
+    PrintWriter out;
+    BufferedReader in;
     Thread thread;
-
+    
     public Client(Socket socket) {
         this.socket = socket;
         setup();
-        startListennig();
+        start();
     }
-
+    
     private void setup() {
         try {
             out = new PrintWriter(socket.getOutputStream(), true);
             in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-        } catch (Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    private void startListennig() {
+    
+    private void start() {
         thread = new Thread(this);
-        thread.start();
+        thread.start();   
     }
-
+    
     @Override
     public void run() {
         try {
             String message;
             while ((message = in.readLine()) != null) { 
-                System.out.println("Server received: " + message);
-                for(Client c: ChatServer.clients){
-                    c.sendMessage(message);
-                }
+                System.out.println(message);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
     
-    private String getMessage() throws IOException {
-        return in.readLine();
-    }
-    
     public void sendMessage(String message) {
         out.println(message);
+    }
+    
+    public void waitForMessages() {
+        try {
+            String message;
+            while ((message = in.readLine()) != null) { 
+                System.out.println("Client received: " + message);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
