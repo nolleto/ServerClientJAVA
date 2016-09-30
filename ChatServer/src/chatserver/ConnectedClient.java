@@ -35,6 +35,14 @@ public class ConnectedClient implements Runnable {
         startListennig();
     }
 
+    public  void close() {
+        try {
+            socket.close();
+        } catch(IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
     private void setup() {
         try {
             out = new PrintWriter(socket.getOutputStream(), true);
@@ -66,6 +74,7 @@ public class ConnectedClient implements Runnable {
             }
             
         } catch (IOException e) {
+            //Desconectou
             e.printStackTrace();
         }
         ChatServer.clients.remove(this);

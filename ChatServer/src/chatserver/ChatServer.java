@@ -16,15 +16,32 @@ import java.util.List;
  * @author Felipe
  */
 public class ChatServer {
-    static List<ConnectedClient> clients;
+    private ServerSocket server;
+    private Thread thread;
+    public static List<ConnectedClient> clients;
     
     public ChatServer(int port) throws IOException {
-        ServerSocket server = new ServerSocket(port);
+        server = new ServerSocket(port);
         clients = new ArrayList<>();
-        waitForClients(server);
+        thread = new Thread(() -> {
+            waitForClients();
+        });
+        thread.start();
     }
 
-    static void waitForClients(ServerSocket server) {
+    public void close() throws IOException {
+        thread.interrupt();
+        clients.stream().forEach((client) -> {
+            client.close();
+        });
+        server.close();
+        
+        thread = null;
+        clients = null;
+        server = null;
+    }
+    
+    private void waitForClients() {
       try {
           while (true) {
               Socket s = server.accept();
