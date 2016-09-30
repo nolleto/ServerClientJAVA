@@ -5,6 +5,7 @@
  */
 package chatserver;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -15,27 +16,19 @@ import java.util.List;
  * @author Felipe
  */
 public class ChatServer {
-    static List<Client> clients;
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        try {
-            ServerSocket server = new ServerSocket(8088);
-            clients = new ArrayList<>();
-            waitForClients(server);
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+    static List<ConnectedClient> clients;
+    
+    public ChatServer(int port) throws IOException {
+        ServerSocket server = new ServerSocket(port);
+        clients = new ArrayList<>();
+        waitForClients(server);
     }
 
     static void waitForClients(ServerSocket server) {
       try {
           while (true) {
               Socket s = server.accept();
-              Client client = new Client(s);
+              ConnectedClient client = new ConnectedClient(s);
               clients.add(client);
           }
       } catch (Exception e) {

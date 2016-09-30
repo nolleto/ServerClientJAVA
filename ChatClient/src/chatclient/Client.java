@@ -38,7 +38,7 @@ public class Client implements Runnable {
     
     private void start() {
         thread = new Thread(this);
-        thread.start();   
+        thread.start();
     }
     
     @Override
@@ -61,7 +61,7 @@ public class Client implements Runnable {
         try {
             String message;
             while ((message = in.readLine()) != null) { 
-                System.out.println("Client received: " + message);
+                System.out.println(message);
             }
         } catch (IOException e) {
             e.printStackTrace();

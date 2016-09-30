@@ -20,10 +20,26 @@ public class ChatClient {
         try {
             InetAddress ia = InetAddress.getByName(null);
             Socket socket = new Socket(ia, 8088);
-            
+            BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
             Client client = new Client(socket);
-            client.sendMessage("Teste");
-            client.waitForMessages();
+            
+            while (true) { 
+                System.out.println("Digite seu apelido: ");
+                String nickname = input.readLine();
+                if (!nickname.isEmpty()) {
+                    client.sendMessage(nickname);
+                    break;
+                }
+            }
+            
+            while (true) { 
+                System.out.println("Mensagem: ");
+                String message = input.readLine();
+                if (message == null) {
+                    break;
+                }
+                client.sendMessage(message);
+            }
             
             socket.close();
             
