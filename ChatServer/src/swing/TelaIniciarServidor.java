@@ -3,17 +3,22 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package chatserver;
+package swing;
 
+import chatserver.ChatServer;
+import java.awt.event.WindowEvent;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.InputVerifier;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 
 /**
  *
  * @author 0094078
  */
 public class TelaIniciarServidor extends javax.swing.JFrame {
-    private ChatServer chatServer;
     
     /**
      * Creates new form TelaServidor
@@ -90,7 +95,28 @@ public class TelaIniciarServidor extends javax.swing.JFrame {
         try {
             String port = jTextField1.getText();
             int portInt = Integer.parseInt(port);
-            chatServer = new ChatServer(portInt);
+            final ChatServer chatServer = new ChatServer(portInt);
+            
+            TelaGerenciar frame = new TelaGerenciar(chatServer);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.pack();
+            frame.setVisible(true);
+            
+            setVisible(false);
+            
+            frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(WindowEvent e) {
+                    try {
+                        chatServer.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(TelaIniciarServidor.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    TelaIniciarServidor.this.setVisible(true);
+                    super.windowClosed(e); //To change body of generated methods, choose Tools | Templates.
+                }
+            });
+            
             
         } catch (Exception e) {
             e.printStackTrace();

@@ -5,11 +5,14 @@
  */
 package chatserver;
 
+import interfaces.ChatServerEvents;
+import interfaces.ConnectedClientEvents;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -18,6 +21,7 @@ import java.util.List;
 public class ChatServer {
     private ServerSocket server;
     private Thread thread;
+    private ChatServerEvents events;
     public static List<ConnectedClient> clients;
     
     public ChatServer(int port) throws IOException {
@@ -29,6 +33,16 @@ public class ChatServer {
         thread.start();
     }
 
+    public void setChatServerEvents(ChatServerEvents chatServerEvents) {
+        this.events = chatServerEvents;
+    }
+
+    public List<ConnectedClient> getClients() {
+        return clients.stream()
+                .filter((x) -> x.isConnected())
+                .collect(Collectors.toList());
+    }
+    
     public void close() throws IOException {
         thread.interrupt();
         clients.stream().forEach((client) -> {
@@ -45,7 +59,36 @@ public class ChatServer {
       try {
           while (true) {
               Socket s = server.accept();
+              if (events != null) {
+                  events.clientConnecting();
+              }
+              
               ConnectedClient client = new ConnectedClient(s);
+              
+              client.setEvents(new ConnectedClientEvents() {
+                  @Override
+                  public void createdNickname(String nickname) {
+                      if (events != null) {
+                          events.clientConnected(client);
+                      }
+                  }
+
+                  @Override
+                  public void messageReceived(RequestMessage message) {
+                      if (events != null) {
+                          
+                      }
+                  }
+
+                  @Override
+                  public void disconnected() {
+                      if (events != null) {
+                          events.clientDisconnected(client);
+                      }
+                      ChatServer.clients.remove(client);
+                  }
+              });
+              
               clients.add(client);
           }
       } catch (Exception e) {

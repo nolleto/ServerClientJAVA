@@ -5,6 +5,8 @@
  */
 package chatserver;
 
+import com.google.gson.Gson;
+import interfaces.ConnectedClientEvents;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,6 +17,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -23,10 +26,12 @@ import java.util.regex.Pattern;
 public class ConnectedClient implements Runnable {
     private UUID id;
     private String nickname;
+    private boolean connected;
     private Socket socket;
     private BufferedReader in;
     private PrintWriter out;
     private Thread thread;
+    private ConnectedClientEvents events;
 
     public ConnectedClient(Socket socket) {
         this.socket = socket;
@@ -35,11 +40,19 @@ public class ConnectedClient implements Runnable {
         startListennig();
     }
 
+    public void setEvents(ConnectedClientEvents events) {
+        this.events = events;
+    }
+
     public  void close() {
+        connected = false;
         try {
             socket.close();
         } catch(IOException e) {
             e.printStackTrace();
+        }
+        if (events != null) {
+            events.disconnected();
         }
     }
     
@@ -60,24 +73,31 @@ public class ConnectedClient implements Runnable {
     @Override
     public void run() {
         try {
-            getNicknameClient();
+            requestNicknameClient();
+            onConnected();
             
-            String message;
-            while ((message = in.readLine()) != null) { 
-                String msg = String.format("%s: %s", nickname, message);
-                List<String> names = getClientNames(msg);
-                List<ConnectedClient> clients = getClients(names);
+            String msgStr;
+            while ((msgStr = in.readLine()) != null) { 
+                RequestMessage request = RequestMessage.fromString(msgStr);
+                String type = request.getType();
                 
-                for (ConnectedClient c: clients){
-                    c.sendMessage(msg);
+                if (type.equals("message")) {
+                    List<String> adresseds = request.getAdresseds();
+                    
+                    for (ConnectedClient client : ChatServer.clients) {
+                        if (client.equals(this)) continue;
+                        if (adresseds.isEmpty() || adresseds.contains(client.getId().toString())) {
+                            client.sendMessage(new ResponseMessage(type, request.getBody(), this.getId().toString()));
+                        }
+                    }
                 }
             }
             
         } catch (IOException e) {
             //Desconectou
-            e.printStackTrace();
+            
         }
-        ChatServer.clients.remove(this);
+        close();
     }
     
     private List<String> getClientNames(String message) {
@@ -114,12 +134,61 @@ public class ConnectedClient implements Runnable {
       return Pattern.compile(pattern);
     }
     
-    private void getNicknameClient() throws IOException {
-        nickname = in.readLine();
+    private void onConnected() {
+        sendMessage(new ResponseMessage("connected"));
+        connected = true;
+        List<User> users = new ArrayList<>();
+        Gson g = new Gson();
+        User current = new User(id, nickname);
+        
+        for (ConnectedClient c : ChatServer.clients) {
+            if (c.isConnected() && !c.getId().equals(ConnectedClient.this.id)) {
+                c.sendMessage(new ResponseMessage("userConnected", g.toJson(current)));
+                users.add(new User(c.getId(), c.getNickname()));
+            }
+        }
+        
+        sendMessage(new ResponseMessage("users", g.toJson(users)));
+    }
+    
+    private void requestNicknameClient() throws IOException {
+        while (true) { 
+            sendMessage(new ResponseMessage("nickname"));
+            String message = null;
+            message = in.readLine();
+            RequestMessage request = RequestMessage.fromString(message);
+            String nick = request.getBody();
+            
+            if (nick != null && !nick.isEmpty() && !nicknameExists(nick)) {
+                nickname = nick;
+                if (events != null) {
+                    events.createdNickname(nickname);
+                }
+                break;
+            }
+        }
+    }
+    
+    private boolean nicknameExists(String n) {
+        boolean result = false;
+        n = n.toLowerCase();
+        
+        for (ConnectedClient c : ChatServer.clients) {
+            if (c.getId().equals(getId()) || !c.isConnected()) continue;
+            if (c.getNickname().toLowerCase().equals(n)) return true;
+        }
+        
+        return result;
     }
     
     private String getMessage() throws IOException {
         return in.readLine();
+    }
+    
+    public void sendMessage(ResponseMessage message) {
+        Gson gson = new Gson();
+        String msg = gson.toJson(message);
+        out.println(msg);
     }
     
     public void sendMessage(String message) {
@@ -132,6 +201,10 @@ public class ConnectedClient implements Runnable {
 
     public String getNickname() {
         return nickname;
+    }
+
+    public boolean isConnected() {
+        return connected;
     }
     
     
