@@ -15,6 +15,8 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -207,5 +209,12 @@ public class ConnectedClient implements Runnable {
         return connected;
     }
     
-    
+    public void killConnection() {
+        try {
+            sendMessage(new ResponseMessage("disconnected"));
+            this.socket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConnectedClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }

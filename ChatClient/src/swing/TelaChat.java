@@ -99,6 +99,13 @@ public class TelaChat extends javax.swing.JFrame {
                     }
                 }
             }
+
+            @Override
+            public void disconnected() {
+                JOptionPane.showMessageDialog(TelaChat.this, "Nós decidimos desconecta-lo! \nPedimos desculpas... :(");
+                TelaChat.this.dispose();
+                new TelaIniciarChat().setVisible(true);
+            }
         });
         
         usersList.setSelectionModel(new DefaultListSelectionModel() {

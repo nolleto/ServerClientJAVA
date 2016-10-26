@@ -84,6 +84,11 @@ public class ChatClient implements Runnable {
             public void userDisconnected(User users) {
                 
             }
+
+            @Override
+            public void disconnected() {
+                
+            }
         };
     }
     
@@ -121,6 +126,10 @@ public class ChatClient implements Runnable {
                     
                 } else if (type.equals("connected")) {
                     events.connected(nickname);
+                }
+                
+                else if (type.equals("disconnected")) {
+                    events.disconnected();
                 }
             }
         } catch (IOException e) {
