@@ -147,4 +147,8 @@ public class ChatClient implements Runnable {
             e.printStackTrace();
         }
     }
+    
+    public String getNickname() {
+        return this.nickname;
+    }
 }
