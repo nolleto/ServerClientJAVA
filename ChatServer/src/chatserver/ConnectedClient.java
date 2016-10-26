@@ -154,10 +154,10 @@ public class ConnectedClient implements Runnable {
     }
     
     private void requestNicknameClient() throws IOException {
+        String instruction = "Digite seu nickname: ";
         while (true) { 
-            sendMessage(new ResponseMessage("nickname"));
-            String message = null;
-            message = in.readLine();
+            sendMessage(new ResponseMessage("nickname", instruction));
+            String message = in.readLine();
             RequestMessage request = RequestMessage.fromString(message);
             String nick = request.getBody();
             
@@ -168,6 +168,8 @@ public class ConnectedClient implements Runnable {
                 }
                 break;
             }
+            instruction = "Nickname invalido, escolha outro. \n"
+                + "Digite seu nickname:";
         }
     }
     

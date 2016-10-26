@@ -51,9 +51,9 @@ public class TelaChat extends javax.swing.JFrame {
         
         chatClient.setEvents(new ChatClientEvents() {
             @Override
-            public String requestNickname() {
+            public String requestNickname(String message) {
                 return JOptionPane.showInputDialog(TelaChat.this,
-                    "Digite seu nome de usuário",
+                    message,
                     "Nickname",
                     JOptionPane.PLAIN_MESSAGE);
             }

@@ -51,7 +51,7 @@ public class ChatClient implements Runnable {
         
         this.events = new ChatClientEvents() {
             @Override
-            public String requestNickname() {
+            public String requestNickname(String message) {
                 try {
                     Thread.sleep(100);
                 } catch (Exception e){
@@ -109,7 +109,7 @@ public class ChatClient implements Runnable {
                     events.receivedMessage(request.getBody(), request.getFrom());
                     
                 } else if (type.equals("nickname")) {
-                    nickname = events.requestNickname();
+                    nickname = events.requestNickname(request.getBody());
                     sendMessage(new ResponseMessage(type, nickname));
                     
                 } else if (type.equals("users")) {
