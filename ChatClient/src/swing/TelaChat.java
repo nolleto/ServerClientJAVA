@@ -8,9 +8,7 @@ package swing;
 import chatclient.ChatClient;
 import chatclient.ResponseMessage;
 import chatclient.User;
-import com.google.gson.Gson;
 import interfaces.ChatClientEvents;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,8 +18,6 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.text.DefaultCaret;
 
 /**
@@ -51,9 +47,9 @@ public class TelaChat extends javax.swing.JFrame {
         
         chatClient.setEvents(new ChatClientEvents() {
             @Override
-            public String requestNickname() {
+            public String requestNickname(String message) {
                 return JOptionPane.showInputDialog(TelaChat.this,
-                    "Digite seu nome de usuário",
+                    message,
                     "Nickname",
                     JOptionPane.PLAIN_MESSAGE);
             }
@@ -70,11 +66,7 @@ public class TelaChat extends javax.swing.JFrame {
             @Override
             public void receivedMessage(String message, String from) {
                 User userFrom = find(from);
-                String currentText = messagesTextArea.getText();
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/HH/yyyy HH:mm:ss");
-                String newMsg = String.format("[%s] %s: %s", sdf.format(new Date()), userFrom.getName(),  message);
-                String newTextToAppend = currentText + "\n" + newMsg;
-                messagesTextArea.setText(newTextToAppend);
+                updateChatMessages(userFrom.getName(), message);
             }
 
             @Override
@@ -103,6 +95,18 @@ public class TelaChat extends javax.swing.JFrame {
                     }
                 }
             }
+
+            @Override
+            public void warned() {
+                JOptionPane.showMessageDialog(TelaChat.this,
+                    "Você está inativo! \nRealize uma ação ou será disconectado em breve!"); 
+            }
+            @Override
+            public void disconnected() {
+                JOptionPane.showMessageDialog(TelaChat.this, "Nós decidimos desconecta-lo! \nPedimos desculpas... :(");
+                TelaChat.this.dispose();
+                new TelaIniciarChat().setVisible(true);
+            }
         });
         
         usersList.setSelectionModel(new DefaultListSelectionModel() {
@@ -129,6 +133,9 @@ public class TelaChat extends javax.swing.JFrame {
             }
         });
         
+        /**
+         * Enable/disables Send button whether input has text
+         **/
         myMessageTextArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -151,6 +158,9 @@ public class TelaChat extends javax.swing.JFrame {
         });
     }
     
+    /**
+    * Retrieves a User from the list of connected users by a given id
+    **/
     private User find(String id) {
         for (User u : userConnecteds) {
             if (u.getId().equals(id)) return u;
@@ -158,6 +168,14 @@ public class TelaChat extends javax.swing.JFrame {
         
         return null;
     }
+    
+    private void updateChatMessages(String senderName, String message) {
+        String currentText = messagesTextArea.getText();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/HH/yyyy HH:mm:ss");
+        String newMsg = String.format("[%s] %s: %s", sdf.format(new Date()), senderName,  message);
+        String newTextToAppend = currentText + "\n" + newMsg;
+        messagesTextArea.setText(newTextToAppend); 
+    } 
         
     /**
      * This method is called from within the constructor to initialize the form.
@@ -178,6 +196,7 @@ public class TelaChat extends javax.swing.JFrame {
         myMessageTextArea = new javax.swing.JTextArea();
         jScrollPane4 = new javax.swing.JScrollPane();
         messagesTextArea = new javax.swing.JTextArea();
+        pongButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -210,6 +229,14 @@ public class TelaChat extends javax.swing.JFrame {
         messagesTextArea.setEnabled(false);
         jScrollPane4.setViewportView(messagesTextArea);
 
+        pongButton.setLabel("Pong Server");
+        pongButton.setName("pongButton"); // NOI18N
+        pongButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pongButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -231,6 +258,8 @@ public class TelaChat extends javax.swing.JFrame {
                     .addComponent(jScrollPane3)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(sendButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pongButton)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -250,13 +279,18 @@ public class TelaChat extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(sendButton)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(sendButton)
+                    .addComponent(pongButton))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Performs the action of clicking Send button
+     **/
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
         int[] indexes = usersList.getSelectedIndices();
         List<String> ids = new ArrayList<>();
@@ -269,9 +303,14 @@ public class TelaChat extends javax.swing.JFrame {
             ids.add(u.getId());
         }
         
+        updateChatMessages(chatClient.getNickname(), msg);
         chatClient.sendMessage(new ResponseMessage("message", msg, ids));
         myMessageTextArea.setText("");
     }//GEN-LAST:event_sendButtonActionPerformed
+
+    private void pongButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pongButtonActionPerformed
+        chatClient.sendMessage(new ResponseMessage("pong"));
+    }//GEN-LAST:event_pongButtonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
@@ -282,6 +321,7 @@ public class TelaChat extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTextArea messagesTextArea;
     private javax.swing.JTextArea myMessageTextArea;
+    private javax.swing.JButton pongButton;
     private javax.swing.JButton sendButton;
     private javax.swing.JList<String> usersList;
     // End of variables declaration//GEN-END:variables

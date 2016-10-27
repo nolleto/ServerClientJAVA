@@ -5,6 +5,7 @@
  */
 package interfaces;
 
+import chatserver.ConnectedClient;
 import chatserver.RequestMessage;
 
 /**
@@ -15,4 +16,5 @@ public interface ConnectedClientEvents {
     void createdNickname(String nickname);
     void messageReceived(RequestMessage message);
     void disconnected();
+    void pong(ConnectedClient client);
 }

@@ -12,6 +12,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -43,6 +44,20 @@ public class ChatServer {
                 .collect(Collectors.toList());
     }
     
+    public void disconnect(String clientNickname) {
+        Optional<ConnectedClient> opt = clients.stream()
+                .filter((x) -> x.isConnected() && x.getNickname().equals(clientNickname))
+                .findFirst();
+        
+        if(opt.isPresent()) {
+            ConnectedClient client = opt.get();
+            client.killConnection();
+            events.clientDisconnected(client);
+        } else {
+            events.errorDisconnecting(clientNickname);
+        }
+    }
+    
     public void close() throws IOException {
         thread.interrupt();
         clients.stream().forEach((client) -> {
@@ -70,13 +85,14 @@ public class ChatServer {
                   public void createdNickname(String nickname) {
                       if (events != null) {
                           events.clientConnected(client);
+                          client.updateAtivity();
                       }
                   }
 
                   @Override
                   public void messageReceived(RequestMessage message) {
                       if (events != null) {
-                          
+                          client.updateAtivity();
                       }
                   }
 
@@ -86,6 +102,13 @@ public class ChatServer {
                           events.clientDisconnected(client);
                       }
                       ChatServer.clients.remove(client);
+                  }
+
+                  @Override
+                  public void pong(ConnectedClient client) {
+                      if (events != null) {
+                          events.clientPong(client);
+                      }
                   }
               });
               

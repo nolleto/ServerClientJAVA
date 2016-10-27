@@ -3,11 +3,9 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/Felipe/Documents/ServerClientJAVA/ChatClient/src/chatclient/ChatClient.java</file>
-            <file>file:/C:/Users/Felipe/Documents/ServerClientJAVA/ChatClient/src/swing/TelaChat.java</file>
-            <file>file:/C:/Users/Felipe/Documents/ServerClientJAVA/ChatClient/src/swing/TelaIniciarChat.java</file>
-            <file>file:/C:/Users/Felipe/Documents/ServerClientJAVA/ChatClient/src/chatclient/ResponseMessage.java</file>
-            <file>file:/C:/Users/Felipe/Documents/ServerClientJAVA/ChatClient/src/chatclient/User.java</file>
+            <file>file:/Users/diegoreidel/Documents/SistemasDistribuidos/ServerClientJAVA/ChatClient/src/swing/TelaIniciarChat.java</file>
+            <file>file:/Users/diegoreidel/Documents/SistemasDistribuidos/ServerClientJAVA/ChatClient/src/chatclient/ChatClient.java</file>
+            <file>file:/Users/diegoreidel/Documents/SistemasDistribuidos/ServerClientJAVA/ChatClient/src/swing/TelaChat.java</file>
         </group>
     </open-files>
 </project-private>

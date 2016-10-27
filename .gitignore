@@ -1,8 +1,3 @@
-
-# Created by https://www.gitignore.io/api/net,netbeans,java
-
-#!! ERROR: net is undefined. Use list command to see defined gitignore types !!#
-
 ### NetBeans ###
 nbproject/private/
 build/

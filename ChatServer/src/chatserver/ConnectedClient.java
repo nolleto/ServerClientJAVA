@@ -13,11 +13,15 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
 
 /**
  *
@@ -32,6 +36,8 @@ public class ConnectedClient implements Runnable {
     private PrintWriter out;
     private Thread thread;
     private ConnectedClientEvents events;
+    private Date lastMessageTime;
+    private boolean warned;
 
     public ConnectedClient(Socket socket) {
         this.socket = socket;
@@ -80,22 +86,22 @@ public class ConnectedClient implements Runnable {
             while ((msgStr = in.readLine()) != null) { 
                 RequestMessage request = RequestMessage.fromString(msgStr);
                 String type = request.getType();
-                
+                updateAtivity();
                 if (type.equals("message")) {
                     List<String> adresseds = request.getAdresseds();
-                    
                     for (ConnectedClient client : ChatServer.clients) {
                         if (client.equals(this)) continue;
                         if (adresseds.isEmpty() || adresseds.contains(client.getId().toString())) {
                             client.sendMessage(new ResponseMessage(type, request.getBody(), this.getId().toString()));
                         }
                     }
+                } else if (type.equals("pong")){
+                    events.pong(this);
                 }
             }
             
         } catch (IOException e) {
             //Desconectou
-            
         }
         close();
     }
@@ -152,10 +158,10 @@ public class ConnectedClient implements Runnable {
     }
     
     private void requestNicknameClient() throws IOException {
+        String instruction = "Digite seu nickname: ";
         while (true) { 
-            sendMessage(new ResponseMessage("nickname"));
-            String message = null;
-            message = in.readLine();
+            sendMessage(new ResponseMessage("nickname", instruction));
+            String message = in.readLine();
             RequestMessage request = RequestMessage.fromString(message);
             String nick = request.getBody();
             
@@ -163,9 +169,12 @@ public class ConnectedClient implements Runnable {
                 nickname = nick;
                 if (events != null) {
                     events.createdNickname(nickname);
+                    updateAtivity();
                 }
                 break;
             }
+            instruction = "Nickname invalido, escolha outro. \n"
+                + "Digite seu nickname:";
         }
     }
     
@@ -194,6 +203,11 @@ public class ConnectedClient implements Runnable {
     public void sendMessage(String message) {
         out.println(message);
     }
+    
+    public void updateAtivity() {
+        setLastMessageTime(Calendar.getInstance().getTime());
+        setWarned(false);
+    }
 
     public UUID getId() {
         return id;
@@ -207,5 +221,28 @@ public class ConnectedClient implements Runnable {
         return connected;
     }
     
+    public void setLastMessageTime(Date date) {
+        this.lastMessageTime = date;
+    }
     
+    public Date getLastMessageTime() {
+        return lastMessageTime;
+    }
+    
+    public void setWarned(boolean warned) {
+        this.warned = warned;
+    }
+    
+    public boolean wasWarned() {
+        return warned;
+    }
+    
+    public void killConnection() {
+        try {
+            sendMessage(new ResponseMessage("disconnected"));
+            this.socket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConnectedClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 }
