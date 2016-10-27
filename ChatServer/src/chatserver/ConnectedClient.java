@@ -95,6 +95,8 @@ public class ConnectedClient implements Runnable {
                             client.sendMessage(new ResponseMessage(type, request.getBody(), this.getId().toString()));
                         }
                     }
+                } else if (type.equals("pong")){
+                    events.pong(this);
                 }
             }
             

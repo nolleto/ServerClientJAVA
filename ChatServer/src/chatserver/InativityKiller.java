@@ -43,8 +43,7 @@ public class InativityKiller implements Runnable{
     private void findSleepers() {
         for (ConnectedClient client : server.getClients()) {
             if(client.wasWarned()) {
-                //TODO: kill client
-                //client.close();
+                client.killConnection();
             } else {
                 Calendar calendar = Calendar.getInstance();
                 Date currentDate = calendar.getTime();

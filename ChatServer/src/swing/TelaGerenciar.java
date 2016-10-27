@@ -68,6 +68,12 @@ public class TelaGerenciar extends javax.swing.JFrame {
                 String message = String.format("Não foi possível desconectar o cliente %s", nickname);
                 printLog(message);
             }
+
+            @Override
+            public void clientPong(ConnectedClient client) {
+                String message = String.format("Client %s pong Server.", client.getNickname());
+                printLog(message);
+            }
         });
              
         jListUsers.addListSelectionListener(new DefaultTableColumnModel(){

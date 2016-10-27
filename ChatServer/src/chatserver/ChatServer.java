@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -103,6 +102,13 @@ public class ChatServer {
                           events.clientDisconnected(client);
                       }
                       ChatServer.clients.remove(client);
+                  }
+
+                  @Override
+                  public void pong(ConnectedClient client) {
+                      if (events != null) {
+                          events.clientPong(client);
+                      }
                   }
               });
               

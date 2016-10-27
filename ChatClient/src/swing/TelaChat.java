@@ -99,9 +99,7 @@ public class TelaChat extends javax.swing.JFrame {
             @Override
             public void warned() {
                 JOptionPane.showMessageDialog(TelaChat.this,
-                    "Você está inativo! \nRealize uma ação ou será disconectado em breve!");
-                //Apertou ok
-                //TODO: mandar mensagem 
+                    "Você está inativo! \nRealize uma ação ou será disconectado em breve!"); 
             }
             @Override
             public void disconnected() {
@@ -198,6 +196,7 @@ public class TelaChat extends javax.swing.JFrame {
         myMessageTextArea = new javax.swing.JTextArea();
         jScrollPane4 = new javax.swing.JScrollPane();
         messagesTextArea = new javax.swing.JTextArea();
+        pongButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -230,6 +229,14 @@ public class TelaChat extends javax.swing.JFrame {
         messagesTextArea.setEnabled(false);
         jScrollPane4.setViewportView(messagesTextArea);
 
+        pongButton.setLabel("Pong Server");
+        pongButton.setName("pongButton"); // NOI18N
+        pongButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pongButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -251,6 +258,8 @@ public class TelaChat extends javax.swing.JFrame {
                     .addComponent(jScrollPane3)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(sendButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pongButton)
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -270,7 +279,9 @@ public class TelaChat extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, 67, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
-                .addComponent(sendButton)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(sendButton)
+                    .addComponent(pongButton))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -297,6 +308,10 @@ public class TelaChat extends javax.swing.JFrame {
         myMessageTextArea.setText("");
     }//GEN-LAST:event_sendButtonActionPerformed
 
+    private void pongButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pongButtonActionPerformed
+        chatClient.sendMessage(new ResponseMessage("pong"));
+    }//GEN-LAST:event_pongButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
@@ -306,6 +321,7 @@ public class TelaChat extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JTextArea messagesTextArea;
     private javax.swing.JTextArea myMessageTextArea;
+    private javax.swing.JButton pongButton;
     private javax.swing.JButton sendButton;
     private javax.swing.JList<String> usersList;
     // End of variables declaration//GEN-END:variables

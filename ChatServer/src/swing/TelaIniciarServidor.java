@@ -101,7 +101,6 @@ public class TelaIniciarServidor extends javax.swing.JFrame {
             InativityKiller killer = new InativityKiller(chatServer);
             new Thread(killer).start();
             
-            
             TelaGerenciar frame = new TelaGerenciar(chatServer);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.pack();

@@ -16,4 +16,5 @@ public interface ChatServerEvents {
     void clientConnected(ConnectedClient client);
     void clientDisconnected(ConnectedClient client);
     void errorDisconnecting(String nickname);
+    void clientPong(ConnectedClient client);
 }
