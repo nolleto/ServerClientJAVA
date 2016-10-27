@@ -13,11 +13,12 @@ import java.util.List;
  * @author Felipe
  */
 public interface ChatClientEvents {
-    String requestNickname();
+    String requestNickname(String message);
     void connected(String nickname);
     void receivedMessage(String message, String from);
     void users(List<User> users);
     void userConnected(User users);
     void userDisconnected(User users);
     void warned();
+    void disconnected();
 }

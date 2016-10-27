@@ -47,9 +47,9 @@ public class TelaChat extends javax.swing.JFrame {
         
         chatClient.setEvents(new ChatClientEvents() {
             @Override
-            public String requestNickname() {
+            public String requestNickname(String message) {
                 return JOptionPane.showInputDialog(TelaChat.this,
-                    "Digite seu nome de usuário",
+                    message,
                     "Nickname",
                     JOptionPane.PLAIN_MESSAGE);
             }
@@ -66,11 +66,7 @@ public class TelaChat extends javax.swing.JFrame {
             @Override
             public void receivedMessage(String message, String from) {
                 User userFrom = find(from);
-                String currentText = messagesTextArea.getText();
-                SimpleDateFormat sdf = new SimpleDateFormat("dd/HH/yyyy HH:mm:ss");
-                String newMsg = String.format("[%s] %s: %s", sdf.format(new Date()), userFrom.getName(),  message);
-                String newTextToAppend = currentText + "\n" + newMsg;
-                messagesTextArea.setText(newTextToAppend);
+                updateChatMessages(userFrom.getName(), message);
             }
 
             @Override
@@ -107,6 +103,12 @@ public class TelaChat extends javax.swing.JFrame {
                 //Apertou ok
                 //TODO: mandar mensagem 
             }
+            @Override
+            public void disconnected() {
+                JOptionPane.showMessageDialog(TelaChat.this, "Nós decidimos desconecta-lo! \nPedimos desculpas... :(");
+                TelaChat.this.dispose();
+                new TelaIniciarChat().setVisible(true);
+            }
         });
         
         usersList.setSelectionModel(new DefaultListSelectionModel() {
@@ -133,6 +135,9 @@ public class TelaChat extends javax.swing.JFrame {
             }
         });
         
+        /**
+         * Enable/disables Send button whether input has text
+         **/
         myMessageTextArea.getDocument().addDocumentListener(new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
@@ -155,6 +160,9 @@ public class TelaChat extends javax.swing.JFrame {
         });
     }
     
+    /**
+    * Retrieves a User from the list of connected users by a given id
+    **/
     private User find(String id) {
         for (User u : userConnecteds) {
             if (u.getId().equals(id)) return u;
@@ -162,6 +170,14 @@ public class TelaChat extends javax.swing.JFrame {
         
         return null;
     }
+    
+    private void updateChatMessages(String senderName, String message) {
+        String currentText = messagesTextArea.getText();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/HH/yyyy HH:mm:ss");
+        String newMsg = String.format("[%s] %s: %s", sdf.format(new Date()), senderName,  message);
+        String newTextToAppend = currentText + "\n" + newMsg;
+        messagesTextArea.setText(newTextToAppend); 
+    } 
         
     /**
      * This method is called from within the constructor to initialize the form.
@@ -261,6 +277,9 @@ public class TelaChat extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    /**
+     * Performs the action of clicking Send button
+     **/
     private void sendButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendButtonActionPerformed
         int[] indexes = usersList.getSelectedIndices();
         List<String> ids = new ArrayList<>();
@@ -273,6 +292,7 @@ public class TelaChat extends javax.swing.JFrame {
             ids.add(u.getId());
         }
         
+        updateChatMessages(chatClient.getNickname(), msg);
         chatClient.sendMessage(new ResponseMessage("message", msg, ids));
         myMessageTextArea.setText("");
     }//GEN-LAST:event_sendButtonActionPerformed

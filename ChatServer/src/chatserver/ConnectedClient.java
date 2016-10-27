@@ -17,9 +17,11 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
 
 /**
  *
@@ -154,10 +156,10 @@ public class ConnectedClient implements Runnable {
     }
     
     private void requestNicknameClient() throws IOException {
+        String instruction = "Digite seu nickname: ";
         while (true) { 
-            sendMessage(new ResponseMessage("nickname"));
-            String message = null;
-            message = in.readLine();
+            sendMessage(new ResponseMessage("nickname", instruction));
+            String message = in.readLine();
             RequestMessage request = RequestMessage.fromString(message);
             String nick = request.getBody();
             
@@ -169,6 +171,8 @@ public class ConnectedClient implements Runnable {
                 }
                 break;
             }
+            instruction = "Nickname invalido, escolha outro. \n"
+                + "Digite seu nickname:";
         }
     }
     
@@ -229,5 +233,14 @@ public class ConnectedClient implements Runnable {
     
     public boolean wasWarned() {
         return warned;
+    }
+    
+    public void killConnection() {
+        try {
+            sendMessage(new ResponseMessage("disconnected"));
+            this.socket.close();
+        } catch (IOException ex) {
+            Logger.getLogger(ConnectedClient.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

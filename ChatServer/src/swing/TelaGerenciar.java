@@ -62,8 +62,14 @@ public class TelaGerenciar extends javax.swing.JFrame {
                     c.sendMessage(new ResponseMessage("userDisconnected", userStr));
                 }
             }
+
+            @Override
+            public void errorDisconnecting(String nickname) {
+                String message = String.format("Não foi possível desconectar o cliente %s", nickname);
+                printLog(message);
+            }
         });
-        
+             
         jListUsers.addListSelectionListener(new DefaultTableColumnModel(){
             @Override
             public void valueChanged(ListSelectionEvent e) {
@@ -117,6 +123,11 @@ public class TelaGerenciar extends javax.swing.JFrame {
 
         jButtonDisconnect.setText("Desconectar");
         jButtonDisconnect.setEnabled(false);
+        jButtonDisconnect.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButtonDisconnectActionPerformed(evt);
+            }
+        });
 
         jTextArea.setEditable(false);
         jTextArea.setColumns(20);
@@ -164,6 +175,11 @@ public class TelaGerenciar extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void jButtonDisconnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButtonDisconnectActionPerformed
+        String nickname = jListUsers.getModel().getElementAt(jListUsers.getSelectedIndex());
+        chatServer.disconnect(nickname);
+    }//GEN-LAST:event_jButtonDisconnectActionPerformed
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

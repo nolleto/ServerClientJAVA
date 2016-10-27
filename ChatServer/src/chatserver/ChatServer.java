@@ -13,6 +13,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +43,20 @@ public class ChatServer {
         return clients.stream()
                 .filter((x) -> x.isConnected())
                 .collect(Collectors.toList());
+    }
+    
+    public void disconnect(String clientNickname) {
+        Optional<ConnectedClient> opt = clients.stream()
+                .filter((x) -> x.isConnected() && x.getNickname().equals(clientNickname))
+                .findFirst();
+        
+        if(opt.isPresent()) {
+            ConnectedClient client = opt.get();
+            client.killConnection();
+            events.clientDisconnected(client);
+        } else {
+            events.errorDisconnecting(clientNickname);
+        }
     }
     
     public void close() throws IOException {

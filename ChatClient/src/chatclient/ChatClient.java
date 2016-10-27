@@ -51,7 +51,7 @@ public class ChatClient implements Runnable {
         
         this.events = new ChatClientEvents() {
             @Override
-            public String requestNickname() {
+            public String requestNickname(String message) {
                 try {
                     Thread.sleep(100);
                 } catch (Exception e){
@@ -84,10 +84,13 @@ public class ChatClient implements Runnable {
             public void userDisconnected(User users) {
                 
             }
-
-            @Override
+            
             public void warned() {
             
+            }
+            
+            public void disconnected() {
+                
             }
         };
     }
@@ -109,7 +112,7 @@ public class ChatClient implements Runnable {
                     events.receivedMessage(request.getBody(), request.getFrom());
                     
                 } else if (type.equals("nickname")) {
-                    nickname = events.requestNickname();
+                    nickname = events.requestNickname(request.getBody());
                     sendMessage(new ResponseMessage(type, nickname));
                     
                 } else if (type.equals("users")) {
@@ -129,6 +132,10 @@ public class ChatClient implements Runnable {
                 
                 } else if (type.equals("warning")) {
                     events.warned();
+                }
+                
+                else if (type.equals("disconnected")) {
+                    events.disconnected();
                 }
             }
         } catch (IOException e) {
@@ -154,5 +161,9 @@ public class ChatClient implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+    
+    public String getNickname() {
+        return this.nickname;
     }
 }
