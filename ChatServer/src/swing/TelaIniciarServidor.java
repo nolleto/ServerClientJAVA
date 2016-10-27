@@ -6,6 +6,7 @@
 package swing;
 
 import chatserver.ChatServer;
+import chatserver.InativityKiller;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -96,6 +97,10 @@ public class TelaIniciarServidor extends javax.swing.JFrame {
             String port = jTextField1.getText();
             int portInt = Integer.parseInt(port);
             final ChatServer chatServer = new ChatServer(portInt);
+            
+            InativityKiller killer = new InativityKiller(chatServer);
+            new Thread(killer).start();
+            
             
             TelaGerenciar frame = new TelaGerenciar(chatServer);
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

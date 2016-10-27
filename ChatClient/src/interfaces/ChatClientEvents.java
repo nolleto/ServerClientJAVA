@@ -19,4 +19,5 @@ public interface ChatClientEvents {
     void users(List<User> users);
     void userConnected(User users);
     void userDisconnected(User users);
+    void warned();
 }

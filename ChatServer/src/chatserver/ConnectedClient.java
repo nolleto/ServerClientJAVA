@@ -13,6 +13,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -32,6 +34,8 @@ public class ConnectedClient implements Runnable {
     private PrintWriter out;
     private Thread thread;
     private ConnectedClientEvents events;
+    private Date lastMessageTime;
+    private boolean warned;
 
     public ConnectedClient(Socket socket) {
         this.socket = socket;
@@ -80,10 +84,9 @@ public class ConnectedClient implements Runnable {
             while ((msgStr = in.readLine()) != null) { 
                 RequestMessage request = RequestMessage.fromString(msgStr);
                 String type = request.getType();
-                
+                updateAtivity();
                 if (type.equals("message")) {
                     List<String> adresseds = request.getAdresseds();
-                    
                     for (ConnectedClient client : ChatServer.clients) {
                         if (client.equals(this)) continue;
                         if (adresseds.isEmpty() || adresseds.contains(client.getId().toString())) {
@@ -95,7 +98,6 @@ public class ConnectedClient implements Runnable {
             
         } catch (IOException e) {
             //Desconectou
-            
         }
         close();
     }
@@ -163,6 +165,7 @@ public class ConnectedClient implements Runnable {
                 nickname = nick;
                 if (events != null) {
                     events.createdNickname(nickname);
+                    updateAtivity();
                 }
                 break;
             }
@@ -194,6 +197,11 @@ public class ConnectedClient implements Runnable {
     public void sendMessage(String message) {
         out.println(message);
     }
+    
+    public void updateAtivity() {
+        setLastMessageTime(Calendar.getInstance().getTime());
+        setWarned(false);
+    }
 
     public UUID getId() {
         return id;
@@ -207,5 +215,19 @@ public class ConnectedClient implements Runnable {
         return connected;
     }
     
+    public void setLastMessageTime(Date date) {
+        this.lastMessageTime = date;
+    }
     
+    public Date getLastMessageTime() {
+        return lastMessageTime;
+    }
+    
+    public void setWarned(boolean warned) {
+        this.warned = warned;
+    }
+    
+    public boolean wasWarned() {
+        return warned;
+    }
 }

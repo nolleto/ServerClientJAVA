@@ -8,9 +8,7 @@ package swing;
 import chatclient.ChatClient;
 import chatclient.ResponseMessage;
 import chatclient.User;
-import com.google.gson.Gson;
 import interfaces.ChatClientEvents;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,8 +18,6 @@ import javax.swing.DefaultListSelectionModel;
 import javax.swing.JOptionPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.text.DefaultCaret;
 
 /**
@@ -102,6 +98,14 @@ public class TelaChat extends javax.swing.JFrame {
                         break;
                     }
                 }
+            }
+
+            @Override
+            public void warned() {
+                JOptionPane.showMessageDialog(TelaChat.this,
+                    "Você está inativo! \nRealize uma ação ou será disconectado em breve!");
+                //Apertou ok
+                //TODO: mandar mensagem 
             }
         });
         

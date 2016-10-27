@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,13 +71,14 @@ public class ChatServer {
                   public void createdNickname(String nickname) {
                       if (events != null) {
                           events.clientConnected(client);
+                          client.updateAtivity();
                       }
                   }
 
                   @Override
                   public void messageReceived(RequestMessage message) {
                       if (events != null) {
-                          
+                          client.updateAtivity();
                       }
                   }
 
